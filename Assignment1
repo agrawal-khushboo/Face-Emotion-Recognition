@@ -1,1 +1,96 @@
 
+from os import listdir
+from PIL import Image
+import numpy as np
+from numpy import linalg as LA
+
+
+# The relative path to your CAFE-Gamma dataset
+data_dir = "./CAFE/"
+
+# Dictionary of semantic "label" to emotions
+emotion_dict = {"h": "happy", "ht": "happy with teeth", "m": "maudlin",
+	"s": "surprise", "f": "fear", "a": "anger", "d": "disgust", "n": "neutral"}
+
+
+def load_data(data_dir):
+	""" Load all PGM images stored in your data directory into a list of NumPy
+	arrays with a list of corresponding labels.
+
+	Args:
+		data_dir: The relative filepath to the CAFE dataset.
+	Returns:
+		images: A list containing every image in CAFE as an array.
+		labels: A list of the corresponding labels (filenames) for each image.
+	"""
+	# Get the list of image file names
+	all_files = listdir(data_dir)
+
+	# Store the images as arrays and their labels in two lists
+	images = []
+	labels = []
+
+	for file in all_files:
+		# Load in the files as PIL images and convert to NumPy arrays
+		if '_ht' in file or '_n' in file:
+			continue
+		else:
+			img = Image.open(data_dir + file)
+			images.append(np.array(img))
+			labels.append(file)
+
+	print("Total number of images:", len(images), "and labels:", len(labels))
+
+	return images, labels
+
+def PCA(data, dims_rescaled_data=2):
+    """
+    returns: data transformed in 2 dims/columns + regenerated original data
+    pass in: data as 2D NumPy array
+    """
+    m, n = data.shape
+    # mean center the data
+    data -= np.mean(data)
+    # calculate the covariance matrix
+    R = np.cov(data, rowvar=False)
+    # calculate eigenvectors & eigenvalues of the covariance matrix
+    # use 'eigh' rather than 'eig' since R is symmetric,
+    # the performance gain is substantial
+    evals, evecs = LA.eigh(R)
+    # sort eigenvalue in decreasing order
+    idx = np.argsort(evals)[::-1]
+    evecs = evecs[:,idx]
+    # sort eigenvectors according to same index
+    evals = evals[idx]
+    # select the first n eigenvectors (n is desired dimension
+    # of rescaled data array, or dims_rescaled_data)
+    evecs = evecs[:, :dims_rescaled_data]
+    # carry out the transformation on the data using eigenvectors
+    # and return the re-scaled data, eigenvalues, and eigenvectors
+    return np.dot(evecs.T, data.T).T, evals, evecs
+
+
+def display_face(img):
+	""" Display the input image and optionally save as a PNG.
+
+	Args:
+		img: The NumPy array or image to display
+
+	Returns: None
+	"""
+	# Convert img to PIL Image object (if it's an ndarray)
+	if type(img) == np.ndarray:
+		print("Converting from array to PIL Image")
+		img = Image.fromarray(img)
+
+	# Display the image
+	img.show()
+
+images,labels = load_data(data_dir = "./CAFE/")
+Data = []
+for image in images:
+	a = image.flatten()
+	Data.append(a)
+
+Data = np.matrix(Data)
+Data,ev,ei = PCA(Data,59)
