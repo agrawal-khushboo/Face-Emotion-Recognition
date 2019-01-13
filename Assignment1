@@ -1,4 +1,3 @@
-
 from os import listdir
 from PIL import Image
 import numpy as np
@@ -43,6 +42,7 @@ def load_data(data_dir):
 
 	return images, labels
 
+
 def PCA(data, dims_rescaled_data=2):
     """
     returns: data transformed in 2 dims/columns + regenerated original data
@@ -50,7 +50,7 @@ def PCA(data, dims_rescaled_data=2):
     """
     m, n = data.shape
     # mean center the data
-    data -= np.mean(data)
+    data = data - np.mean(data)
     # calculate the covariance matrix
     R = np.cov(data, rowvar=False)
     # calculate eigenvectors & eigenvalues of the covariance matrix
@@ -68,7 +68,6 @@ def PCA(data, dims_rescaled_data=2):
     # carry out the transformation on the data using eigenvectors
     # and return the re-scaled data, eigenvalues, and eigenvectors
     return np.dot(evecs.T, data.T).T, evals, evecs
-
 
 def display_face(img):
 	""" Display the input image and optionally save as a PNG.
@@ -93,4 +92,4 @@ for image in images:
 	Data.append(a)
 
 Data = np.matrix(Data)
-Data,ev,ei = PCA(Data,59)
+Data,ev,ei = PCA(Data.T,59)
