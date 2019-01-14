@@ -10,7 +10,8 @@ data_dir = "./CAFE/"
 # Dictionary of semantic "label" to emotions
 emotion_dict = {"h": "happy", "ht": "happy with teeth", "m": "maudlin",
     "s": "surprise", "f": "fear", "a": "anger", "d": "disgust", "n": "neutral"}
-
+Happydata=[]
+saddata=[]
 
 def load_data(data_dir):
     """ Load all PGM images stored in your data directory into a list of NumPy
@@ -28,10 +29,23 @@ def load_data(data_dir):
     # Store the images as arrays and their labels in two lists
     images = []
     labels = []
+    
 
     for file in all_files:
+        
         # Load in the files as PIL images and convert to NumPy arrays
-        if '_ht' in file or '_n' in file:
+        if '_ht' in file:
+            img = Image.open(data_dir + file)
+            Happydata.append(np.array(img))
+            images.append(np.array(img))
+            labels.append(file)
+        elif '_m' in file:
+            img = Image.open(data_dir + file)
+            saddata.append(np.array(img))
+            images.append(np.array(img))
+            labels.append(file)
+        
+        elif '_h' in file or '_n' in file:
             continue
         else:
             img = Image.open(data_dir + file)
@@ -68,7 +82,7 @@ def PCA(data, dims_rescaled_data):
     # carry out the transformation on the data using eigenvectors
     # and return the re-scaled data, eigenvalues, and eigenvectors
     for i in range(len(evecs)):
-         sum = np.linalg.norm(evecs[i])
+        sum = np.linalg.norm(evecs[i])
         evecs[i] = evecs[i]/sum
         #print(evals[i])
         evecs[i] = evecs[i]/math.sqrt(abs(evals[i]))
