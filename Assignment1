@@ -66,7 +66,7 @@ def PCA(data, dims_rescaled_data):
     # mean center the data
     data = data - np.mean(data,axis=0)
     # calculate the covariance matrix
-    R = np.cov(data.T, rowvar=False)
+    R = np.matmul(data,data.T)
     # calculate eigenvectors & eigenvalues of the covariance matrix
     # use 'eigh' rather than 'eig' since R is symmetric,
     # the . gain is substantial
@@ -79,16 +79,19 @@ def PCA(data, dims_rescaled_data):
     # select the first n eigenvectors (n is desired dimension
     # of rescaled data array, or dims_rescaled_data)
     evecs = evecs[:, :dims_rescaled_data]
+#     print(len(evecs))
     # carry out the transformation on the data using eigenvectors
     # and return the re-scaled data, eigenvalues, and eigenvectors
-    for i in range(len(evecs)):
-        sum = np.linalg.norm(evecs[i])
-        evecs[i] = evecs[i]/sum
-        #print(evals[i])
-        evecs[i] = evecs[i]/math.sqrt(abs(evals[i]))
-
     eigen_vectors = np.dot(data.T,evecs)
+    for i in range(eigen_vectors.shape[1]):
+        sum = np.linalg.norm(eigen_vectors[:,i])
+        eigen_vectors[:,i] = eigen_vectors[:,i]/sum
+#         print(evals[i])
+        eigen_vectors[:,i] = eigen_vectors[:,i]/math.sqrt(evals[i])
+
+    
     return data, evals, eigen_vectors
+
 
 def display_face(img):
     """ Display the input image and optionally save as a PNG.
@@ -105,14 +108,103 @@ def display_face(img):
 
     # Display the image
     img.show()
+    
+def reduce_dimensions(Data):
+    Data_new = []
+    for image in Data:
+        a = image.flatten()
+        Data_new.append(a)
+
+    Data_new = np.matrix(Data_new)
+    print(Data_new.shape)
+    _,ev,ei = PCA(Data_new,len(Data)-1)
+    reduced_data = np.dot(Data_new,ei)
+    return reduced_data,ei
 
 images,labels = load_data(data_dir = "./CAFE/")
-Data = []
-for image in images:
-    a = image.flatten()
-    Data.append(a)
+Data,ei = reduce_dimensions(images)
 
-Data = np.matrix(Data)
-_,ev,ei = PCA(Data,40)
-data_new = np.dot(Data,ei)
+
+def sigmoid(value):
+    return 1/(1+np.exp(-value))
+def lossfunction(validation,validationlabel,weights):
+    loss  = 0
+    for i in range(len(validation)):
+        value=np.dot(validation[i],weights)
+        predict=sigmoid(value)
+        loss += validationlabel[i]*math.log(predict) + (1-validationlabel[i])*math.log(1-predict)
+    return -loss
+
+def logistic_regression(features, target,epochs,rate,validation,validationlabel):
+    weights= np.zeros(features.shape[1])
+    loss= lossfunction(validation,validationlabel,weights)
+    for epoch in range(epochs):
+        value= np.dot(features,weights)
+        predict=sigmoid(value)
+        gradient= np.dot((target-predict),features)
+        new_weights= weights+rate*gradient
+        new_loss= lossfunction(validation,validationlabel,weights)
+        if new_loss<loss:
+            weights=new_weights
+    return weights
+        
+for i in range(10):
+    train=[]
+    validation=[]
+    trainlabel=[]
+    testlabel=[]
+    newvalidation=[]
+    validationlabel=[]
+    test=[]
+    if i<9:
+        for k in range(10):
+            if k==i:
+                test.append(Happydata[k])
+                testlabel.append(1)
+                test.append(saddata[k])
+                testlabel.append(0)
+            elif k==i+1:
+                validation.append(Happydata[k])
+                validationlabel.append(1)
+                validation.append(saddata[k])
+                validationlabel.append(0)
+            else:
+                train.append(Happydata[k])
+                trainlabel.append(1)
+                train.append(saddata[k])
+                trainlabel.append(0)
+    else:
+        test.append(Happydata[k])
+        testlabel.append(1)
+        test.append(saddata[k])
+        testlabel.append(0)
+        validation.append(Happydata[0])
+        validationlabel.append(1)
+        validation.append(saddata[0])
+        validationlabel.append(0)
+        for k in range(1,9):
+            train.append(Happydata[k])
+            trainlabel.append(1)
+            train.append(saddata[k])
+            trainlabel.append(0)
+    train,eigenvec=reduce_dimensions(train)
+#     validation=np.matrix(validation)
+    for image in validation:
+        newvalidation.append(image.flatten())
+        
+    newvalidation = np.matrix(newvalidation)
+    
+    newvalidation=np.matmul(newvalidation,eigenvec)
+    print(newvalidation.shape)
+#     validation= validation
+#     logistic_regression(train,trainlabel,10,0.1)
+    w=logistic_regression(train,trainlabel,10,0.1,newvalidation,validationlabel)
+    print(w)
+
+    
+    
+    
+    
+    
+
 
