@@ -237,6 +237,46 @@ avg_accuracy = avg_accuracy*1.0/10
 
 #softmax regression for all six emaotions
 
+def yn(weights,features):
+    s=0
+    y=[]
+    value=np.matmul(features,weights)
+    value=np.log(value)
+    value=np.array(value)
+    for i in range(len(value)):
+        s=np.sum(value[i])
+        y.append(value[i]/s)
+    y=np.matrix(y)
+    return y
+
+def softmax_loss(validation,validationlabel,weights):
+    loss=0
+    y=yn(weights,validation)
+    y=np.array(y)
+    for i in range(validation.shape[0]):
+        for j in range(6):
+            loss+= validationlabel[i][j]*np.log(y[i][j])
+    return -loss
+
+def softmax_regression(features, target, epochs, rate, validation, validationlabel):
+    weights=np.zeros((features.shape[1],6), dtype=np.int)
+    new_weights=np.zeros((features.shape[1],6), dtype=np.int)
+    loss= softmax_loss(validation,validationlabel,weights)
+    for i in range(epochs):
+        gradient=0
+        predict=yn(weights,features)
+        predict=np.array(predict)
+        for j in range(features.shape[0]):
+            for k in range(6):
+                gradient+=(target[j][k]-predict[j][k])*features[j] 
+        new_weights=weights+rate*gradient
+        new_loss=softmax_loss(validation,validationlabel,new_weights)
+        if new_loss<loss:
+            loss=new_loss
+            weights=new_weights
+    return weights
+
+
 for i in range(10):
     train = []
     validation = []
@@ -316,3 +356,23 @@ for i in range(10):
             trainlabel.append(label)
             
     train, eigenvec = reduce_dimensions(train)
+    trainlabel=np.matrix(trainlabel)
+#     validationlabel=np.matrix(validationlabel)
+#     testlabel=np.matrix(testlabel)
+    for image in validation:
+        newvalidation.append(image.flatten())
+
+    newvalidation = np.matrix(newvalidation)
+
+    newvalidation = np.matmul(newvalidation, eigenvec)
+    newtest = []
+    for image in test:
+        newtest.append(image.flatten())
+
+    newtest = np.matrix(newtest)
+
+    newtest = np.matmul(newtest, eigenvec)
+    print(newtest.shape)
+    w = softmax_regression(train, trainlabel, 10, 0.1, newvalidation, validationlabel)
+    print(w)
+    
