@@ -275,6 +275,15 @@ def softmax_regression(features, target, epochs, rate, validation, validationlab
             weights=new_weights
     return weights
 
+def softmaxaccuracy(test,testlabel,weights):
+    correct = 0
+    predict = yn(test,weights)
+    for i in range(test.shape[0]):
+        argpre=np.argmax(predict[i])
+        argtest=np.argmax(testlabel[i])
+        if argpre == argtest:
+            correct +=1
+    return correct/test.shape[0]
 
 for i in range(10):
     train = []
@@ -373,5 +382,6 @@ for i in range(10):
     newtest = np.matmul(newtest, eigenvec)
     print(newtest.shape)
     w = softmax_regression(train, trainlabel, 10, 0.1, newvalidation, validationlabel)
-    print(w)
+#     print(w)
+
     
