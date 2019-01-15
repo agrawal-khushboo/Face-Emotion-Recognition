@@ -12,7 +12,8 @@ emotion_dict = {"h": "happy", "ht": "happy with teeth", "m": "maudlin",
                 "s": "surprise", "f": "fear", "a": "anger", "d": "disgust", "n": "neutral"}
 Happydata = []
 saddata = []
-
+images = []
+labels = []
 
 def load_data(data_dir):
     """ Load all PGM images stored in your data directory into a list of NumPy
@@ -28,8 +29,7 @@ def load_data(data_dir):
     all_files = listdir(data_dir)
 
     # Store the images as arrays and their labels in two lists
-    images = []
-    labels = []
+
 
     for file in all_files:
 
@@ -169,6 +169,8 @@ def logistic_regression(features, target, epochs, rate, validation, validationla
     return weights
 avg_error = 0
 avg_accuracy = 0
+
+#logistic regression happy v/s sad
 for i in range(10):
     train = []
     validation = []
@@ -226,12 +228,91 @@ for i in range(10):
     error = lossfunction(newtest,testlabel,w)
     avg_error += error
     accuracy = calculate_accuracy(newtest,testlabel,w)
-    print(accuracy)
     avg_accuracy += accuracy
 
 avg_error = avg_error*1.0/10
 avg_accuracy = avg_accuracy*1.0/10
-print(avg_accuracy)
-print(avg_error)
 
 
+
+#softmax regression for all six emaotions
+
+for i in range(10):
+    train = []
+    validation = []
+    trainlabel = []
+    testlabel = []
+    newvalidation = []
+    validationlabel = []
+    test = []
+    if i < 9:
+        for k in range(60):
+            if '_h' in labels[k]:
+                label = [1, 0, 0, 0, 0, 0]
+            elif '_m' in labels[k]:
+                label = [0, 1, 0, 0, 0, 0]
+            elif '_s' in labels[k]:
+                label = [0, 0, 1, 0, 0, 0]
+            elif '_f' in labels[k]:
+                label = [0, 0, 0, 1, 0, 0]
+            elif '_a' in labels[k]:
+                label = [0, 0, 0, 0, 1, 0]
+            else:
+                label = [0, 0, 0, 0, 0, 1]
+            if k >= 6*i and k < 6*(i+1):
+                test.append(images[k])
+                testlabel.append(label)
+            elif k >= 6*(i+1) and k < 6*(i+2):
+                validation.append(images[k])
+                validationlabel.append(label)
+            else:
+                train.append(images[k])
+                trainlabel.append(label)
+    else:
+        for k in range(6*i,6*(i+1)):
+            if '_h' in labels[k]:
+                label = [1, 0, 0, 0, 0, 0]
+            elif '_m' in labels[k]:
+                label = [0, 1, 0, 0, 0, 0]
+            elif '_s' in labels[k]:
+                label = [0, 0, 1, 0, 0, 0]
+            elif '_f' in labels[k]:
+                label = [0, 0, 0, 1, 0, 0]
+            elif '_a' in labels[k]:
+                label = [0, 0, 0, 0, 1, 0]
+            else:
+                label = [0, 0, 0, 0, 0, 1]
+            test.append(images[k])
+            testlabel.append(label)
+        for k in range(0,6):
+            if '_h' in labels[k]:
+                label = [1, 0, 0, 0, 0, 0]
+            elif '_m' in labels[k]:
+                label = [0, 1, 0, 0, 0, 0]
+            elif '_s' in labels[k]:
+                label = [0, 0, 1, 0, 0, 0]
+            elif '_f' in labels[k]:
+                label = [0, 0, 0, 1, 0, 0]
+            elif '_a' in labels[k]:
+                label = [0, 0, 0, 0, 1, 0]
+            else:
+                label = [0, 0, 0, 0, 0, 1]
+            validation.append(images[k])
+            validationlabel.append(label)
+        for k in range(6,54):
+            if '_h' in labels[k]:
+                label = [1, 0, 0, 0, 0, 0]
+            elif '_m' in labels[k]:
+                label = [0, 1, 0, 0, 0, 0]
+            elif '_s' in labels[k]:
+                label = [0, 0, 1, 0, 0, 0]
+            elif '_f' in labels[k]:
+                label = [0, 0, 0, 1, 0, 0]
+            elif '_a' in labels[k]:
+                label = [0, 0, 0, 0, 1, 0]
+            else:
+                label = [0, 0, 0, 0, 0, 1]
+            train.append(images[k])
+            trainlabel.append(label)
+            
+    train, eigenvec = reduce_dimensions(train)
