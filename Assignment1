@@ -127,6 +127,20 @@ def sigmoid(value):
     return 1.0 / (1 + np.exp(-value))
 
 
+def calculate_accuracy(test,testlabel,weights):
+    correct = 0
+    for i in range(test.shape[0]):
+        value = np.dot(weights, test[i].T)
+        predict = sigmoid(value)
+        if predict >=0.5:
+            y =1
+        else:
+            y=0
+        if y == testlabel[i]:
+            correct +=1
+    return correct/test.shape[0]
+
+
 def lossfunction(validation, validationlabel, weights):
     loss = 0
     for i in range(validation.shape[0]):
@@ -150,11 +164,11 @@ def logistic_regression(features, target, epochs, rate, validation, validationla
         updated_weights = weights + rate*gradient
         new_loss = lossfunction(validation,validationlabel,updated_weights)
         if new_loss < loss:
-            print(loss)
             loss = new_loss
             weights = updated_weights
     return weights
-
+avg_error = 0
+avg_accuracy = 0
 for i in range(10):
     train = []
     validation = []
@@ -210,3 +224,14 @@ for i in range(10):
 
     newtest = np.matmul(newtest, eigenvec)
     error = lossfunction(newtest,testlabel,w)
+    avg_error += error
+    accuracy = calculate_accuracy(newtest,testlabel,w)
+    print(accuracy)
+    avg_accuracy += accuracy
+
+avg_error = avg_error*1.0/10
+avg_accuracy = avg_accuracy*1.0/10
+print(avg_accuracy)
+print(avg_error)
+
+
