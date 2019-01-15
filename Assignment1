@@ -267,8 +267,7 @@ def softmax_regression(features, target, epochs, rate, validation, validationlab
         predict=yn(weights,features)
         predict=np.array(predict)
         for j in range(features.shape[0]):
-            for k in range(6):
-                gradient+=(target[j][k]-predict[j][k])*features[j] 
+            gradient+= np.matmul(features[j].T,np.matrix(target[j]-predict[j]))
         new_weights=weights+rate*gradient
         new_loss=softmax_loss(validation,validationlabel,new_weights)
         if new_loss<loss:
