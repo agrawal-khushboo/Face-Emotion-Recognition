@@ -111,6 +111,16 @@ def reduce_dimensions(Data):
     return reduced_data, ei
 images, labels = load_data(data_dir="./CAFE/")
 Data, ei = reduce_dimensions(images)
+
+import matplotlib.pyplot as plt
+def eigenvector_image(ev):
+    ev=np.array(ev.T)
+    ev=np.reshape(ev, (380,240))
+    image=plt.imshow(ev)
+    print(image)
+
+eigenvector_image(ei[:,4])
+
 def sigmoid(value):
     return 1.0 / (1 + np.exp(-value))
 def calculate_accuracy(test, testlabel, weights):
