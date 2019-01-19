@@ -12,6 +12,8 @@ emotion_dict = {"h": "happy", "ht": "happy with teeth", "m": "maudlin",
                 "s": "surprise", "f": "fear", "a": "anger", "d": "disgust", "n": "neutral"}
 Happydata = []
 saddata = []
+Afraid = []
+surprised = []
 images = []
 labels = []
 def load_data(data_dir):
@@ -36,6 +38,16 @@ def load_data(data_dir):
         elif '_m' in file:
             img = Image.open(data_dir + file)
             saddata.append(np.array(img))
+            images.append(np.array(img))
+            labels.append(file)
+        elif '_a' in file:
+            img = Image.open(data_dir + file)
+            Afraid.append(np.array(img))
+            images.append(np.array(img))
+            labels.append(file)
+        elif '_s' in file:
+            img = Image.open(data_dir + file)
+            surprised.append(np.array(img))
             images.append(np.array(img))
             labels.append(file)
         elif '_h' in file or '_n' in file:
@@ -94,7 +106,7 @@ def reduce_dimensions(Data):
         a = image.flatten()
         Data_new.append(a)
     Data_new = np.matrix(Data_new)
-    _, ev, ei = PCA(Data_new, len(Data) - 1)
+    _, ev, ei = PCA(Data_new, 10)
     reduced_data = np.dot(Data_new, ei)
     return reduced_data, ei
 images, labels = load_data(data_dir="./CAFE/")
@@ -214,6 +226,8 @@ for epoch in range(1,11):
     X.append(epoch)
     avg_error = avg_error * 1.0 / 10
     avg_accuracy = avg_accuracy * 1.0 / 10
+
+print(avg_accuracy)
 plt.plot(X,training_error,'r')
 plt.plot(X,holdout_loss,'b')
 plt.xlabel('Number of Epochs')
@@ -241,6 +255,7 @@ def softmax_loss(validation, validationlabel, weights):
     for i in range(validation.shape[0]):
         for j in range(6):
             loss += validationlabel[i][j] * np.log(y[i][j])
+    print(-loss)
     return -loss
 def softmax_regression(features, target, epochs, rate, validation, validationlabel):
     weights = np.zeros((features.shape[1], 6), dtype=np.int)
