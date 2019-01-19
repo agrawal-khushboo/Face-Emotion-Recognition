@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import statistics
 # The relative path to your CAFE-Gamma dataset
 data_dir = "./CAFE/"
-
 # Dictionary of semantic "label" to emotions
 emotion_dict = {"h": "happy", "ht": "happy with teeth", "m": "maudlin",
                 "s": "surprise", "f": "fear", "a": "anger", "d": "disgust", "n": "neutral"}
@@ -15,12 +14,9 @@ Happydata = []
 saddata = []
 images = []
 labels = []
-
-
 def load_data(data_dir):
     """ Load all PGM images stored in your data directory into a list of NumPy
     arrays with a list of corresponding labels.
-
     Args:
         data_dir: The relative filepath to the CAFE dataset.
     Returns:
@@ -29,11 +25,8 @@ def load_data(data_dir):
     """
     # Get the list of image file names
     all_files = listdir(data_dir)
-
     # Store the images as arrays and their labels in two lists
-
     for file in all_files:
-
         # Load in the files as PIL images and convert to NumPy arrays
         if '_ht' in file:
             img = Image.open(data_dir + file)
@@ -45,19 +38,14 @@ def load_data(data_dir):
             saddata.append(np.array(img))
             images.append(np.array(img))
             labels.append(file)
-
         elif '_h' in file or '_n' in file:
             continue
         else:
             img = Image.open(data_dir + file)
             images.append(np.array(img))
             labels.append(file)
-
     print("Total number of images:", len(images), "and labels:", len(labels))
-
     return images, labels
-
-
 def PCA(data, dims_rescaled_data):
     """
     returns: data transformed in 2 dims/columns + regenerated original data
@@ -87,47 +75,32 @@ def PCA(data, dims_rescaled_data):
         sum = np.linalg.norm(eigen_vectors[:, i])
         eigen_vectors[:, i] = eigen_vectors[:, i] / sum
         eigen_vectors[:, i] = eigen_vectors[:, i] / math.sqrt(evals[i])
-
     return data, evals, eigen_vectors
-
-
 def display_face(img):
     """ Display the input image and optionally save as a PNG.
-
     Args:
         img: The NumPy array or image to display
-
     Returns: None
     """
     # Convert img to PIL Image object (if it's an ndarray)
     if type(img) == np.ndarray:
         print("Converting from array to PIL Image")
         img = Image.fromarray(img)
-
     # Display the image
     img.show()
-
-
 def reduce_dimensions(Data):
     Data_new = []
     for image in Data:
         a = image.flatten()
         Data_new.append(a)
-
     Data_new = np.matrix(Data_new)
     _, ev, ei = PCA(Data_new, len(Data) - 1)
     reduced_data = np.dot(Data_new, ei)
     return reduced_data, ei
-
-
 images, labels = load_data(data_dir="./CAFE/")
 Data, ei = reduce_dimensions(images)
-
-
 def sigmoid(value):
     return 1.0 / (1 + np.exp(-value))
-
-
 def calculate_accuracy(test, testlabel, weights):
     correct = 0
     for i in range(test.shape[0]):
@@ -140,8 +113,6 @@ def calculate_accuracy(test, testlabel, weights):
         if y == testlabel[i]:
             correct += 1
     return correct / test.shape[0]
-
-
 def lossfunction(validation, validationlabel, weights):
     loss = 0
     for i in range(validation.shape[0]):
@@ -149,8 +120,6 @@ def lossfunction(validation, validationlabel, weights):
         predict = sigmoid(value)
         loss += validationlabel[i] * np.log(predict) + (1 - validationlabel[i]) * np.log(1 - predict)
     return -loss[0,0]
-
-
 def logistic_regression(features, target, epochs, rate, validation, validationlabel):
     weights = np.zeros(features.shape[1])
     updated_weights = np.zeros(features.shape[1])
@@ -167,10 +136,6 @@ def logistic_regression(features, target, epochs, rate, validation, validationla
             loss = new_loss
             weights = updated_weights
     return weights
-
-
-
-
 # logistic regression happy v/s sad
 X = []
 training_error = []
@@ -224,9 +189,7 @@ for epoch in range(1,11):
         train, eigenvec = reduce_dimensions(train)
         for image in validation:
             newvalidation.append(image.flatten())
-
         newvalidation = np.matrix(newvalidation)
-
         newvalidation = np.matmul(newvalidation, eigenvec)
         w = logistic_regression(train, trainlabel, epoch, learning_rate, newvalidation, validationlabel)
         train_set_loss = lossfunction(train, trainlabel, w)*1.0/len(train)
@@ -236,15 +199,12 @@ for epoch in range(1,11):
         newtest = []
         for image in test:
             newtest.append(image.flatten())
-
         newtest = np.matrix(newtest)
-
         newtest = np.matmul(newtest, eigenvec)
         error = lossfunction(newtest, testlabel, w)*1.0/len(newtest)
         avg_error += error
         accuracy = calculate_accuracy(newtest, testlabel, w)
         avg_accuracy += accuracy
-
     avg_train_error = sum(avg_training_error)*1.0/10
     standard_deviation = statistics.stdev(avg_training_error)
     standard_dev.append(standard_deviation)
@@ -254,7 +214,6 @@ for epoch in range(1,11):
     X.append(epoch)
     avg_error = avg_error * 1.0 / 10
     avg_accuracy = avg_accuracy * 1.0 / 10
-
 plt.plot(X,training_error,'r')
 plt.plot(X,holdout_loss,'b')
 plt.xlabel('Number of Epochs')
@@ -274,20 +233,15 @@ def yn(weights, features):
         y.append(value[i] / s)
     y = np.matrix(y)
     return y
-
-
 def softmax_loss(validation, validationlabel, weights):
     loss = 0
     y = yn(weights, validation)
     y = np.array(y)
-    print(validationlabel.shape)
-    print(y.shape)
+    validationlabel=np.array(validationlabel)
     for i in range(validation.shape[0]):
         for j in range(6):
             loss += validationlabel[i][j] * np.log(y[i][j])
     return -loss
-
-
 def softmax_regression(features, target, epochs, rate, validation, validationlabel):
     weights = np.zeros((features.shape[1], 6), dtype=np.int)
     new_weights = np.zeros((features.shape[1], 6), dtype=np.int)
@@ -304,8 +258,6 @@ def softmax_regression(features, target, epochs, rate, validation, validationlab
             loss = new_loss
             weights = new_weights
     return weights
-
-
 def softmaxaccuracy(test, testlabel, weights):
     correct = 0
     predict = yn(test, weights)
@@ -315,8 +267,6 @@ def softmaxaccuracy(test, testlabel, weights):
         if argpre == argtest:
             correct += 1
     return correct / test.shape[0]
-
-
 X = []
 training_error = []
 holdout_loss = []
@@ -403,23 +353,18 @@ for epoch in range(1,51):
                     label = [0, 0, 0, 0, 0, 1]
                 train.append(images[k])
                 trainlabel.append(label)
-
         train, eigenvec = reduce_dimensions(train)
         trainlabel = np.matrix(trainlabel)
         #     validationlabel=np.matrix(validationlabel)
         #     testlabel=np.matrix(testlabel)
         for image in validation:
             newvalidation.append(image.flatten())
-
         newvalidation = np.matrix(newvalidation)
-
         newvalidation = np.matmul(newvalidation, eigenvec)
         newtest = []
         for image in test:
             newtest.append(image.flatten())
-
         newtest = np.matrix(newtest)
-
         newtest = np.matmul(newtest, eigenvec)
         w = softmax_regression(train, trainlabel, epoch, 0.1, newvalidation, validationlabel)
         train_set_loss = softmax_loss(train, trainlabel, w) * 1.0 / (len(train)*6)
@@ -430,7 +375,6 @@ for epoch in range(1,51):
         avg_error += error
         accuracy = softmaxaccuracy(newtest, testlabel, w)
         avg_accuracy += accuracy
-
     avg_train_error = sum(avg_training_error) * 1.0 / 10
     standard_deviation = statistics.stdev(avg_training_error)
     standard_dev.append(standard_deviation)
@@ -440,7 +384,6 @@ for epoch in range(1,51):
     X.append(epoch)
     avg_error = avg_error * 1.0 / 10
     avg_accuracy = avg_accuracy * 1.0 / 10
-
 plt.plot(X,training_error,'r')
 plt.plot(X,holdout_loss,'b')
 plt.xlabel('')
