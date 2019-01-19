@@ -594,4 +594,17 @@ plt.ylabel('Loss')
 plt.title('Training and HoldOut Loss v/s Number of Epochs')
 plt.show()
 
-
+w=np.matrix(w)
+for i in range(6):
+    image=np.zeros((1,91200), dtype=np.int)
+    image=np.matrix(image)
+    image=image.T
+    emotion=w[:,i]
+    for j in range(10):
+        eigen= ei[:,j]*emotion[j,0]
+        image= image + eigen
+    image=image.T
+    image=np.reshape(image, (380,240))
+    plt.imshow(image, cmap="gray")
+    plt.show()
+    
