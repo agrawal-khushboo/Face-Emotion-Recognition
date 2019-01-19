@@ -406,12 +406,14 @@ plt.ylabel('')
 plt.title('')
 plt.show()
 
+# softmax regression for all six emaotions using stochastic
+
 
 def softmax_stochastic(features, target, epochs, rate, validation, validationlabel):
     weights=np.zeros((features.shape[1],6), dtype=np.int)
     new_weights=np.zeros((features.shape[1],6), dtype=np.int)
     loss= softmax_loss(validation,validationlabel,weights)
-    p=np.arrange(features.shape[0])
+    p=np.arange(features.shape[0])
     for i in range(epochs):
         gradient=0
         predict=yn(weights,features)
@@ -426,4 +428,129 @@ def softmax_stochastic(features, target, epochs, rate, validation, validationlab
                 weights=new_weights
     return weights
 
+
+
+X = []
+training_error = []
+holdout_loss = []
+standard_dev = []
+for epoch in range(1,51):
+    avg_error = 0
+    avg_accuracy = 0
+    avg_training_error = []
+    avg_holdout_loss = 0
+    for i in range(10):
+        train = []
+        validation = []
+        trainlabel = []
+        testlabel = []
+        newvalidation = []
+        validationlabel = []
+        test = []
+        if i < 9:
+            for k in range(60):
+                if '_h' in labels[k]:
+                    label = [1, 0, 0, 0, 0, 0]
+                elif '_m' in labels[k]:
+                    label = [0, 1, 0, 0, 0, 0]
+                elif '_s' in labels[k]:
+                    label = [0, 0, 1, 0, 0, 0]
+                elif '_f' in labels[k]:
+                    label = [0, 0, 0, 1, 0, 0]
+                elif '_a' in labels[k]:
+                    label = [0, 0, 0, 0, 1, 0]
+                else:
+                    label = [0, 0, 0, 0, 0, 1]
+                if k >= 6 * i and k < 6 * (i + 1):
+                    test.append(images[k])
+                    testlabel.append(label)
+                elif k >= 6 * (i + 1) and k < 6 * (i + 2):
+                    validation.append(images[k])
+                    validationlabel.append(label)
+                else:
+                    train.append(images[k])
+                    trainlabel.append(label)
+        else:
+            for k in range(6 * i, 6 * (i + 1)):
+                if '_h' in labels[k]:
+                    label = [1, 0, 0, 0, 0, 0]
+                elif '_m' in labels[k]:
+                    label = [0, 1, 0, 0, 0, 0]
+                elif '_s' in labels[k]:
+                    label = [0, 0, 1, 0, 0, 0]
+                elif '_f' in labels[k]:
+                    label = [0, 0, 0, 1, 0, 0]
+                elif '_a' in labels[k]:
+                    label = [0, 0, 0, 0, 1, 0]
+                else:
+                    label = [0, 0, 0, 0, 0, 1]
+                test.append(images[k])
+                testlabel.append(label)
+            for k in range(0, 6):
+                if '_h' in labels[k]:
+                    label = [1, 0, 0, 0, 0, 0]
+                elif '_m' in labels[k]:
+                    label = [0, 1, 0, 0, 0, 0]
+                elif '_s' in labels[k]:
+                    label = [0, 0, 1, 0, 0, 0]
+                elif '_f' in labels[k]:
+                    label = [0, 0, 0, 1, 0, 0]
+                elif '_a' in labels[k]:
+                    label = [0, 0, 0, 0, 1, 0]
+                else:
+                    label = [0, 0, 0, 0, 0, 1]
+                validation.append(images[k])
+                validationlabel.append(label)
+            for k in range(6, 54):
+                if '_h' in labels[k]:
+                    label = [1, 0, 0, 0, 0, 0]
+                elif '_m' in labels[k]:
+                    label = [0, 1, 0, 0, 0, 0]
+                elif '_s' in labels[k]:
+                    label = [0, 0, 1, 0, 0, 0]
+                elif '_f' in labels[k]:
+                    label = [0, 0, 0, 1, 0, 0]
+                elif '_a' in labels[k]:
+                    label = [0, 0, 0, 0, 1, 0]
+                else:
+                    label = [0, 0, 0, 0, 0, 1]
+                train.append(images[k])
+                trainlabel.append(label)
+        train, eigenvec = reduce_dimensions(train)
+        trainlabel = np.matrix(trainlabel)
+        #     validationlabel=np.matrix(validationlabel)
+        #     testlabel=np.matrix(testlabel)
+        for image in validation:
+            newvalidation.append(image.flatten())
+        newvalidation = np.matrix(newvalidation)
+        newvalidation = np.matmul(newvalidation, eigenvec)
+        newtest = []
+        for image in test:
+            newtest.append(image.flatten())
+        newtest = np.matrix(newtest)
+        newtest = np.matmul(newtest, eigenvec)
+        w = softmax_stochastic(train, trainlabel, epoch, 0.1, newvalidation, validationlabel)
+        train_set_loss = softmax_loss(train, trainlabel, w) * 1.0 / (len(train)*6)
+        hold_set_loss = softmax_loss(newvalidation, validationlabel, w) * 1.0 / (len(newvalidation)*6)
+        avg_training_error.append(train_set_loss)
+        avg_holdout_loss += hold_set_loss
+        error = softmax_loss(newtest, testlabel, w) * 1.0 / (len(newtest)*6)
+        avg_error += error
+        accuracy = softmaxaccuracy(newtest, testlabel, w)
+        avg_accuracy += accuracy
+    avg_train_error = sum(avg_training_error) * 1.0 / 10
+    standard_deviation = statistics.stdev(avg_training_error)
+    standard_dev.append(standard_deviation)
+    avg_holdout_loss = avg_holdout_loss * 1.0 / 10
+    training_error.append(avg_train_error)
+    holdout_loss.append(avg_holdout_loss)
+    X.append(epoch)
+    avg_error = avg_error * 1.0 / 10
+    avg_accuracy = avg_accuracy * 1.0 / 10
+plt.plot(X,training_error,'r')
+plt.plot(X,holdout_loss,'b')
+plt.xlabel('')
+plt.ylabel('')
+plt.title('')
+plt.show()
 
