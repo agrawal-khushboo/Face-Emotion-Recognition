@@ -152,10 +152,13 @@ def logistic_regression(features, target, epochs, rate, validation, validationla
 
 # logistic regression happy v/s sad
 X = []
+X_prime = []
 training_error = []
 holdout_loss = []
 standard_dev = []
-learning_rate = 0.1
+learning_rate = 10
+#Happydata = Afraid
+#saddata  = surprised
 for epoch in range(1,11):
     avg_error = 0
     avg_accuracy = 0
@@ -221,7 +224,9 @@ for epoch in range(1,11):
         avg_accuracy += accuracy
     avg_train_error = sum(avg_training_error)*1.0/10
     standard_deviation = statistics.stdev(avg_training_error)
-    standard_dev.append(standard_deviation)
+    if epoch == 2 or epoch ==4 or epoch ==8 or epoch==10:
+        X_prime.append(epoch)
+        standard_dev.append(standard_deviation)
     avg_holdout_loss = avg_holdout_loss*1.0/10
     training_error.append(avg_train_error)
     holdout_loss.append(avg_holdout_loss)
@@ -230,10 +235,12 @@ for epoch in range(1,11):
     avg_accuracy = avg_accuracy * 1.0 / 10
 
 print(avg_accuracy)
-plt.plot(X,training_error,'r')
-plt.plot(X,holdout_loss,'b')
+plt.plot(X,training_error,'r',label = 'Training set Loss')
+plt.plot(X,holdout_loss,'b',label = 'Holdout set Loss')
+plt.legend(loc='upper right')
+#plt.scatter(X_prime, standard_dev, c='y', label='Standard deviation')
 plt.xlabel('Number of Epochs')
-plt.ylabel('')
+plt.ylabel('Loss')
 plt.title('Training and HoldOut Loss v/s Number of Epochs')
 plt.show()
 # softmax regression for all six emaotions
@@ -293,8 +300,8 @@ def confusion_matrix(test, testlabel, weights):
         argpre = np.argmax(predict[i])
         argtest = np.argmax(testlabel[i])
         a[argtest][argpre] += 1
-    print(a)
-    a = a / a.sum(axis=0)
+    for row in range(a.shape[0]):
+        a[row] = a[row]/np.sum(a[row])
     print(a)
 
 
@@ -302,7 +309,7 @@ X = []
 training_error = []
 holdout_loss = []
 standard_dev = []
-for epoch in range(50,51):
+for epoch in range(1,51):
     avg_error = 0
     avg_accuracy = 0
     avg_training_error = []
@@ -398,7 +405,8 @@ for epoch in range(50,51):
         newtest = np.matrix(newtest)
         newtest = np.matmul(newtest, eigenvec)
         w = softmax_regression(train, trainlabel, epoch, 0.1, newvalidation, validationlabel)
-        #confusion_matrix(newtest, testlabel, w)
+        if epoch == 50 and i == 1:
+            confusion_matrix(newtest, testlabel, w)
         train_set_loss = softmax_loss(train, trainlabel, w) * 1.0 / (len(train)*6)
         hold_set_loss = softmax_loss(newvalidation, validationlabel, w) * 1.0 / (len(newvalidation)*6)
         avg_training_error.append(train_set_loss)
@@ -416,11 +424,14 @@ for epoch in range(50,51):
     X.append(epoch)
     avg_error = avg_error * 1.0 / 10
     avg_accuracy = avg_accuracy * 1.0 / 10
-plt.plot(X,training_error,'r')
-plt.plot(X,holdout_loss,'b')
-plt.xlabel('')
-plt.ylabel('')
-plt.title('')
+
+print(training_error)
+plt.plot(X,training_error,'r',label = 'Training set loss')
+plt.plot(X,holdout_loss,'b',label = 'Holdout set loss')
+plt.legend(loc='upper right')
+plt.xlabel('Number of Epochs')
+plt.ylabel('Loss')
+plt.title('Training and HoldOut Loss v/s Number of Epochs')
 plt.show()
 
 # softmax regression for all six emaotions using stochastic
@@ -547,6 +558,7 @@ for epoch in range(1,51):
         newtest = np.matrix(newtest)
         newtest = np.matmul(newtest, eigenvec)
         w = softmax_stochastic(train, trainlabel, epoch, 0.1, newvalidation, validationlabel)
+        print(w)
         train_set_loss = softmax_loss(train, trainlabel, w) * 1.0 / (len(train)*6)
         hold_set_loss = softmax_loss(newvalidation, validationlabel, w) * 1.0 / (len(newvalidation)*6)
         avg_training_error.append(train_set_loss)
@@ -564,10 +576,13 @@ for epoch in range(1,51):
     X.append(epoch)
     avg_error = avg_error * 1.0 / 10
     avg_accuracy = avg_accuracy * 1.0 / 10
-plt.plot(X,training_error,'r')
-plt.plot(X,holdout_loss,'b')
-plt.xlabel('')
-plt.ylabel('')
-plt.title('')
+print(training_error)
+plt.plot(X,training_error,'r',label = 'Training set loss')
+plt.plot(X,holdout_loss,'b',label = 'Holdout set loss')
+plt.legend(loc='upper right')
+plt.xlabel('Number of Epochs')
+plt.ylabel('Loss')
+plt.title('Training and HoldOut Loss v/s Number of Epochs')
 plt.show()
+
 
