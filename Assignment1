@@ -148,6 +148,8 @@ def logistic_regression(features, target, epochs, rate, validation, validationla
             loss = new_loss
             weights = updated_weights
     return weights
+
+
 # logistic regression happy v/s sad
 X = []
 training_error = []
@@ -239,6 +241,8 @@ plt.show()
 def yn(weights, features):
     s = 0
     y = []
+    weights = np.matrix(weights)
+    features = np.matrix(features)
     value = np.matmul(features, weights)
     value = np.exp(value)
     value = np.array(value)
@@ -255,7 +259,6 @@ def softmax_loss(validation, validationlabel, weights):
     for i in range(validation.shape[0]):
         for j in range(6):
             loss += validationlabel[i][j] * np.log(y[i][j])
-    print(-loss)
     return -loss
 def softmax_regression(features, target, epochs, rate, validation, validationlabel):
     weights = np.zeros((features.shape[1], 6), dtype=np.int)
@@ -275,18 +278,31 @@ def softmax_regression(features, target, epochs, rate, validation, validationlab
     return weights
 def softmaxaccuracy(test, testlabel, weights):
     correct = 0
-    predict = yn(test, weights)
+    predict = yn(weights, test)
     for i in range(test.shape[0]):
         argpre = np.argmax(predict[i])
         argtest = np.argmax(testlabel[i])
         if argpre == argtest:
             correct += 1
     return correct / test.shape[0]
+
+def confusion_matrix(test, testlabel, weights):
+    a = np.zeros(shape=(6, 6))
+    predict = yn(weights, test)
+    for i in range(len(test)):
+        argpre = np.argmax(predict[i])
+        argtest = np.argmax(testlabel[i])
+        a[argtest][argpre] += 1
+    print(a)
+    a = a / a.sum(axis=0)
+    print(a)
+
+
 X = []
 training_error = []
 holdout_loss = []
 standard_dev = []
-for epoch in range(1,51):
+for epoch in range(50,51):
     avg_error = 0
     avg_accuracy = 0
     avg_training_error = []
@@ -382,6 +398,7 @@ for epoch in range(1,51):
         newtest = np.matrix(newtest)
         newtest = np.matmul(newtest, eigenvec)
         w = softmax_regression(train, trainlabel, epoch, 0.1, newvalidation, validationlabel)
+        #confusion_matrix(newtest, testlabel, w)
         train_set_loss = softmax_loss(train, trainlabel, w) * 1.0 / (len(train)*6)
         hold_set_loss = softmax_loss(newvalidation, validationlabel, w) * 1.0 / (len(newvalidation)*6)
         avg_training_error.append(train_set_loss)
