@@ -405,3 +405,25 @@ plt.xlabel('')
 plt.ylabel('')
 plt.title('')
 plt.show()
+
+
+def softmax_stochastic(features, target, epochs, rate, validation, validationlabel):
+    weights=np.zeros((features.shape[1],6), dtype=np.int)
+    new_weights=np.zeros((features.shape[1],6), dtype=np.int)
+    loss= softmax_loss(validation,validationlabel,weights)
+    p=np.arrange(features.shape[0])
+    for i in range(epochs):
+        gradient=0
+        predict=yn(weights,features)
+        predict=np.array(predict)
+        p=np.random.permutation(p)
+        for j in range(features.shape[0]):
+            gradient=np.matmul(features[p[j]].T,np.matrix(target[p[j]]-predict[p[j]]))
+            new_weights=weights+rate*gradient
+            new_loss=softmax_loss(validation,validationlabel,new_weights)
+            if new_loss<loss:
+                loss=new_loss
+                weights=new_weights
+    return weights
+
+
