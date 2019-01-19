@@ -156,7 +156,7 @@ X_prime = []
 training_error = []
 holdout_loss = []
 standard_dev = []
-learning_rate = 10
+learning_rate = 0.1
 #Happydata = Afraid
 #saddata  = surprised
 for epoch in range(1,11):
@@ -309,7 +309,7 @@ X = []
 training_error = []
 holdout_loss = []
 standard_dev = []
-for epoch in range(1,51):
+for epoch in range(50,51):
     avg_error = 0
     avg_accuracy = 0
     avg_training_error = []
@@ -405,6 +405,7 @@ for epoch in range(1,51):
         newtest = np.matrix(newtest)
         newtest = np.matmul(newtest, eigenvec)
         w = softmax_regression(train, trainlabel, epoch, 0.1, newvalidation, validationlabel)
+        print(w)
         if epoch == 50 and i == 1:
             confusion_matrix(newtest, testlabel, w)
         train_set_loss = softmax_loss(train, trainlabel, w) * 1.0 / (len(train)*6)
@@ -425,7 +426,7 @@ for epoch in range(1,51):
     avg_error = avg_error * 1.0 / 10
     avg_accuracy = avg_accuracy * 1.0 / 10
 
-print(training_error)
+print(avg_accuracy)
 plt.plot(X,training_error,'r',label = 'Training set loss')
 plt.plot(X,holdout_loss,'b',label = 'Holdout set loss')
 plt.legend(loc='upper right')
@@ -558,7 +559,6 @@ for epoch in range(1,51):
         newtest = np.matrix(newtest)
         newtest = np.matmul(newtest, eigenvec)
         w = softmax_stochastic(train, trainlabel, epoch, 0.1, newvalidation, validationlabel)
-        print(w)
         train_set_loss = softmax_loss(train, trainlabel, w) * 1.0 / (len(train)*6)
         hold_set_loss = softmax_loss(newvalidation, validationlabel, w) * 1.0 / (len(newvalidation)*6)
         avg_training_error.append(train_set_loss)
@@ -576,7 +576,6 @@ for epoch in range(1,51):
     X.append(epoch)
     avg_error = avg_error * 1.0 / 10
     avg_accuracy = avg_accuracy * 1.0 / 10
-print(training_error)
 plt.plot(X,training_error,'r',label = 'Training set loss')
 plt.plot(X,holdout_loss,'b',label = 'Holdout set loss')
 plt.legend(loc='upper right')
