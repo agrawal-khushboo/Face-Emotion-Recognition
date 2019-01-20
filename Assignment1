@@ -472,7 +472,7 @@ plt.title('Logistic Regression for Afraid v/s Surprised')
 plt.show()
 
 
-# softmax regression for all six emaotions
+# Softmax Regression using Batch gradient descent for all 6 emotions
 X = []
 training_error = []
 holdout_loss = []
@@ -615,6 +615,7 @@ plt.title('Training and HoldOut Loss v/s Number of Epochs')
 plt.show()
 
 
+# Softmax Regression using Stochastic gradient descent for all 6 emotions
 X = []
 training_error = []
 holdout_loss = []
@@ -738,6 +739,3 @@ plt.xlabel('Number of Epochs')
 plt.ylabel('Loss')
 plt.title('Training and HoldOut Loss v/s Number of Epochs')
 plt.show()
-
-
-
